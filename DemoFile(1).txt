@@ -1,0 +1,33 @@
+name: Large File Check
+
+on:
+  push:
+
+jobs:
+  check-large-files:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Find files larger than 1KB
+        run: |
+          find . -type f -size +1k -print > large_files.txt || true
+          if [ -s large_files.txt ]; then
+            echo "LARGE_FILES=true" >> $GITHUB_ENV
+          fi
+
+      - name: Notify Slack if large files found
+        if: env.LARGE_FILES == 'true'
+        run: |
+          curl -X POST -H 'Content-type: application/json' \
+          --data "{\"text\": \"⚠️ Large files pushed:\n$(cat large_files.txt)\"}" \
+          ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: Notify Google Chat if large files found
+        if: env.LARGE_FILES == 'true'
+        run: |
+          curl -X POST -H 'Content-Type: application/json' \
+          --data "{\"text\": \"⚠️ Large files pushed:\n$(cat large_files.txt)\"}" \
+          ${{ secrets.GCHAT_WEBHOOK_URL }}
