@@ -11,23 +11,29 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: List file sizes (debug)
-        run: |
-          echo "Listing file sizes..."
-          find . -type f -exec ls -l {} \;
-
       - name: Find files larger than 1KB
         run: |
-          find . -type f -size +1024c -print > large_files.txt || true
-          echo "Detected files:"
-          cat large_files.txt || true
+          find . -type f -size +1k -print > large_files.txt || true
           if [ -s large_files.txt ]; then
             echo "LARGE_FILES=true" >> $GITHUB_ENV
           fi
 
+      - name: Debug — print detected files
+        if: env.LARGE_FILES == 'true'
+        run: |
+          echo "Detected large files:"
+          cat large_files.txt
+
       - name: Notify Google Chat if large files found
         if: env.LARGE_FILES == 'true'
         run: |
-          curl -X POST -H "Content-Type: application/json" \
-          --data "{\"text\": \"⚠️ Large files pushed:\n$(cat large_files.txt)\"}" \
-          ${{ secrets.GCHAT_WEBHOOK_URL }}
+          MESSAGE=$(printf "⚠️ Large files pushed:\n%s" "$(cat large_files.txt)")
+          JSON="{\"text\": \"${MESSAGE}\"}"
+
+          echo "Sending JSON:"
+          echo "$JSON"
+
+          curl -X POST \
+            -H "Content-Type: application/json" \
+            --data "$JSON" \
+            "${{ secrets.GCHAT_WEBHOOK_URL }}"
