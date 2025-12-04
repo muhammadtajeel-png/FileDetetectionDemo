@@ -11,9 +11,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: List file sizes (debug)
+        run: |
+          echo "Listing file sizes..."
+          find . -type f -exec ls -l {} \;
+
       - name: Find files larger than 1KB
         run: |
-          find . -type f -size +1k -print > large_files.txt || true
+          find . -type f -size +1024c -print > large_files.txt || true
+          echo "Detected files:"
+          cat large_files.txt || true
           if [ -s large_files.txt ]; then
             echo "LARGE_FILES=true" >> $GITHUB_ENV
           fi
