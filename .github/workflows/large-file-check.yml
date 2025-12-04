@@ -11,9 +11,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Find files larger than 2GB
+      - name: Find files larger than 1KB
         run: |
-          find . -type f -size +2G -print > large_files.txt || true
+          find . -type f -size +1k -print > large_files.txt || true
           if [ -s large_files.txt ]; then
             echo "LARGE_FILES=true" >> $GITHUB_ENV
           fi
