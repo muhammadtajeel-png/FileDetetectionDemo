@@ -11,9 +11,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Find files larger than 1KB
+      - name: Find files larger than 1KB (with sizes)
         run: |
-          find . -type f -size +1k -print > large_files.txt || true
+          echo "" > large_files.txt
+          find . -type f -size +1k -print0 | while IFS= read -r -d '' file; do
+            size=$(stat -c%s "$file")
+            human=$(numfmt --to=iec --suffix=B $size)
+            echo "$file — $human" >> large_files.txt
+          done
+
           if [ -s large_files.txt ]; then
             echo "LARGE_FILES=true" >> $GITHUB_ENV
           fi
