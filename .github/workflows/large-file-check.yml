@@ -18,16 +18,9 @@ jobs:
             echo "LARGE_FILES=true" >> $GITHUB_ENV
           fi
 
-      - name: Notify Slack if large files found
-        if: env.LARGE_FILES == 'true'
-        run: |
-          curl -X POST -H 'Content-type: application/json' \
-          --data "{\"text\": \"⚠️ Large files pushed:\n$(cat large_files.txt)\"}" \
-          ${{ secrets.SLACK_WEBHOOK_URL }}
-
       - name: Notify Google Chat if large files found
         if: env.LARGE_FILES == 'true'
         run: |
-          curl -X POST -H 'Content-Type: application/json' \
+          curl -X POST -H "Content-Type: application/json" \
           --data "{\"text\": \"⚠️ Large files pushed:\n$(cat large_files.txt)\"}" \
           ${{ secrets.GCHAT_WEBHOOK_URL }}
