@@ -33,7 +33,11 @@ jobs:
       - name: Notify Google Chat if large files found
         if: env.LARGE_FILES == 'true'
         run: |
-          MESSAGE=$(printf "⚠️ Large files pushed:\n%s" "$(cat large_files.txt)")
+          # Get pusher info
+          ACTOR="${{ github.actor }}"
+          EMAIL="${{ github.event.pusher.email }}"
+
+          MESSAGE=$(printf "⚠️ Large files pushed by %s (%s):\n%s" "$ACTOR" "$EMAIL" "$(cat large_files.txt)")
           JSON="{\"text\": \"${MESSAGE}\"}"
 
           echo "Sending JSON:"
